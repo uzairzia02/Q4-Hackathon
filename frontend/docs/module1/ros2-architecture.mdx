@@ -1,0 +1,52 @@
+---
+sidebar_position: 2
+---
+
+# Chapter 2: ROS 2 Architecture and Core Concepts
+
+Robot Operating System 2 (ROS 2) is a flexible framework for writing robot software. It's a collection of tools, libraries, and conventions that aim to simplify the task of creating complex and robust robot behaviors across a wide variety of robotic platforms.
+
+## What is ROS 2?
+
+ROS 2 provides an operating system-like layer on top of a conventional OS (like Linux). It offers:
+-   **Middleware**: A communication layer enabling different parts of your robot system to talk to each other.
+-   **Standardized Tools**: Utilities for debugging, visualization, logging, and more.
+-   **Libraries**: Implementations of common robot functionalities.
+-   **Ecosystem**: A large community and a wealth of pre-built packages.
+
+## Key Concepts
+
+### Nodes
+
+Nodes are executable processes that perform computation. In ROS 2, every functional block of code (e.g., a sensor driver, a motor controller, a planning algorithm) is ideally encapsulated within a node.
+-   **Single-purpose**: Each node should ideally be responsible for a single module-scope purpose.
+-   **Decoupled**: Nodes are independent and communicate through ROS 2's middleware.
+
+### Topics
+
+Topics are named buses over which nodes exchange messages asynchronously. This is a publish/subscribe communication model:
+-   **Publisher**: A node that sends messages to a topic.
+-   **Subscriber**: A node that receives messages from a topic.
+-   **Message Types**: Data transmitted over topics must conform to a predefined message type.
+
+### Services
+
+Services are a request/reply communication model in ROS 2. They are used for synchronous interactions where a client sends a request and waits for a response from a service server.
+-   **Client**: Requests a service.
+-   **Server**: Provides the service and sends a response.
+-   **Service Types**: Define the structure of the request and response messages.
+
+### Actions
+
+Actions are used for long-running tasks with feedback. They are built on topics and services, providing a more robust way to handle tasks that take a significant amount of time to complete.
+-   **Goal**: The desired outcome of the action.
+-   **Feedback**: Intermediate updates on the progress of the action.
+-   **Result**: The final outcome of the action.
+
+## Bridging Python Agents to ROS Controllers with `rclpy`
+
+`rclpy` is the Python client library for ROS 2. It allows you to write ROS 2 nodes in Python, leveraging the rich Python ecosystem for AI, machine learning, and high-level control logic.
+-   **Creating Nodes**: `rclpy.node.Node` class.
+-   **Publishers/Subscribers**: `create_publisher`, `create_subscription`.
+-   **Clients/Servers**: `create_client`, `create_service`.
+-   **Actions**: `rclpy.action.ActionClient`, `rclpy.action.ActionServer`.

@@ -1,0 +1,107 @@
+---
+sidebar_position: 2
+---
+
+# Chapter 11: Cognitive Planning with GPT-4
+
+After converting voice commands into text using OpenAI Whisper, the next critical step in a Vision-Language-Action (VLA) pipeline is to translate this natural language instruction into a sequence of executable robot actions. Large Language Models (LLMs) like GPT-4 excel at understanding complex instructions and generating coherent responses, making them ideal for cognitive planning in robotics.
+
+## LLMs in the VLA Pipeline
+
+The "Language" part of the VLA pipeline takes the transcribed text and uses an LLM to generate a high-level plan or a sequence of specific robot actions.
+
+`Voice (Speech) -> Whisper -> Language (Text) -> LLM Planner -> Action (Robot Commands)`
+
+## Cognitive Planning with GPT-4
+
+GPT-4, with its advanced reasoning capabilities, can interpret abstract natural language goals (e.g., "Clean the room") and break them down into a series of smaller, more concrete steps that a robot can understand and execute.
+
+### Prompt Engineering for Robotics
+
+The effectiveness of using GPT-4 for cognitive planning heavily relies on **prompt engineering**. You need to provide the LLM with:
+1.  **Context**: Information about the robot's capabilities, its environment, and available tools.
+2.  **Goal**: The natural language instruction from the user.
+3.  **Constraints**: Any limitations the robot might have (e.g., cannot lift heavy objects, limited battery).
+4.  **Format**: The desired output format for the robot's plan (e.g., a JSON list of actions, a sequence of ROS 2 service calls).
+
+**Example Prompt Structure**
+
+```
+You are a robot task planner. Your goal is to convert high-level human commands into a sequence of atomic robot actions.
+The robot has the following capabilities:
+- `move_to(location)`: Navigates to a specified location.
+- `pick_up(object)`: Grabs a specified object.
+- `place_object(object, location)`: Places a held object at a location.
+- `detect_object(object_name)`: Detects a specific object in the current field of view.
+
+Available locations: "kitchen", "living_room", "bedroom".
+Available objects: "cup", "book", "block".
+
+User command: "Go to the kitchen, pick up the cup, and bring it to the living room."
+
+Generate a JSON list of actions:
+```
+
+### GPT-4 API Integration
+
+Integrating GPT-4 involves making API calls with carefully crafted prompts.
+
+**Example: Calling GPT-4 (Python)**
+
+```python
+import openai
+import os
+import json
+
+# Set your OpenAI API key
+# openai.api_key = os.getenv("OPENAI_API_KEY")
+
+def get_robot_plan(user_command, robot_capabilities, available_locations, available_objects):
+    prompt = f"""
+You are a robot task planner. Your goal is to convert high-level human commands into a sequence of atomic robot actions.
+The robot has the following capabilities:
+{'- ' + chr(10).join(robot_capabilities)}
+
+Available locations: {', '.join(available_locations)}.
+Available objects: {', '.join(available_objects)}.
+
+User command: "{user_command}"
+
+Generate a JSON list of actions, for example:
+[{{ "action": "move_to", "location": "kitchen" }}, {{ "action": "pick_up", "object": "cup" }}]
+"""
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that generates robot plans."},
+                {"role": "user", "content": prompt}
+            ],
+            response_format={ "type": "json_object" }
+        )
+        plan_text = response.choices[0].message.content
+        return json.loads(plan_text)
+    except openai.APIError as e:
+        print(f"OpenAI API error: {e}")
+        return None
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        return None
+
+# Example usage
+# capabilities = [
+#     "move_to(location)", "pick_up(object)", "place_object(object, location)", "detect_object(object_name)"
+# ]
+# locations = ["kitchen", "living_room", "bedroom"]
+# objects = ["cup", "book", "block"]
+# command = "Go to the kitchen, pick up the cup, and bring it to the living room."
+# plan = get_robot_plan(command, capabilities, locations, objects)
+# print(json.dumps(plan, indent=2))
+```
+
+## Bridging LLM Plans to ROS 2 Actions
+
+The JSON output from GPT-4 needs to be translated into actual ROS 2 commands. This involves:
+1.  **Parsing the Plan**: Extracting actions and parameters from the JSON.
+2.  **Action Dispatcher**: A ROS 2 node that maps each abstract action to a specific ROS 2 service call, action goal, or topic publish.
+3.  **State Monitoring**: Keeping track of the robot's current state and environment to ensure the plan is executed correctly.

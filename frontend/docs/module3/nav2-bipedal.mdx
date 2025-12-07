@@ -1,0 +1,47 @@
+---
+sidebar_position: 3
+---
+
+# Chapter 9: Nav2 for Bipedal Navigation
+
+Nav2 is the ROS 2 navigation stack, providing a framework for mobile robots to autonomously navigate from a starting pose to a goal pose while avoiding obstacles. While Nav2 is commonly used for wheeled robots, adapting it for bipedal (humanoid) navigation introduces unique challenges related to balance, gait generation, and contact with the environment.
+
+## What is Nav2?
+
+Nav2 is a modular navigation system composed of several ROS 2 nodes, including:
+-   **`amcl` (Adaptive Monte Carlo Localization)**: Estimates the robot's pose within a known map.
+-   **`map_server`**: Provides map data to other nodes.
+-   **`global_planner`**: Computes a path from the start to the goal, considering the static map.
+-   **`local_planner`**: Generates velocity commands to follow the global path and avoid dynamic obstacles.
+-   **`controller_server`**: Executes the velocity commands and provides feedback.
+
+## Challenges of Bipedal Navigation
+
+Humanoid robots present several complexities for navigation that differ from wheeled robots:
+-   **Balance Control**: Humanoids must maintain balance throughout their gait cycle.
+-   **Kinematics and Dynamics**: Complex multi-jointed legs and arms require sophisticated inverse kinematics and dynamics.
+-   **Footstep Planning**: Instead of continuous velocity commands, bipedal robots require discrete footstep plans.
+-   **Terrain Negotiation**: Humanoids can potentially step over obstacles, but this requires robust perception and planning.
+
+## Adapting Nav2 for Humanoids
+
+Directly applying Nav2 to a humanoid requires custom components to handle the bipedal locomotion.
+
+### Custom Local Planner (Behavior Tree Integration)
+
+Instead of outputting velocity commands, a custom local planner for humanoids might:
+-   **Generate Footstep Plans**: Based on the global path, determine a sequence of footsteps.
+-   **Integrate with Gait Generators**: Interface with a whole-body controller or gait generator that can execute the footstep plan while maintaining balance.
+-   **Utilize Perception**: Use sensor data (e.g., from Isaac ROS) to detect obstacles and adjust footsteps dynamically.
+
+### Behavior Trees
+
+Nav2 heavily relies on Behavior Trees for flexible and robust navigation. For humanoids, a behavior tree can orchestrate complex tasks like:
+-   `WalkToGoal`
+-   `AvoidObstacle`
+-   `RecoverBalance`
+-   `PickUpObject` (integrated with manipulation stack)
+
+## Example: Nav2 with a Simple Biped
+
+**(Further details and launch file example for Nav2 with a simple biped would go here. This would involve custom plugins for the local planner and potentially a whole-body controller.)**

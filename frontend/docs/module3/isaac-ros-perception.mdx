@@ -1,0 +1,56 @@
+---
+sidebar_position: 2
+---
+
+# Chapter 8: Isaac ROS for Perception
+
+NVIDIA Isaac ROS is a collection of hardware-accelerated ROS 2 packages that make it easier to develop high-performance robotics applications. It provides optimized components for common robotics tasks, especially in perception, leveraging NVIDIA GPUs and the Jetson platform.
+
+## What is Isaac ROS?
+
+Isaac ROS modules provide:
+-   **Hardware Acceleration**: Highly optimized algorithms for vision and AI tasks, utilizing NVIDIA GPUs.
+-   **ROS 2 Native**: Built specifically for the ROS 2 ecosystem, ensuring seamless integration.
+-   **Modular Design**: Individual packages for specific functionalities like VSLAM, object detection, and stereo depth.
+-   **Jetson Optimization**: Designed to run efficiently on NVIDIA Jetson platforms for edge robotics.
+
+## Key Modules for Perception
+
+### Visual SLAM (Simultaneous Localization and Mapping)
+
+VSLAM is the process of simultaneously estimating the robot's pose (localization) and building a map of its environment. Isaac ROS offers highly optimized VSLAM solutions.
+
+-   **`isaac_ros_visual_slam`**: A ROS 2 package that provides real-time visual odometry and mapping using a single camera or stereo cameras. It's often based on NVIDIA's CUDA-accelerated VSLAM libraries.
+
+### Object Detection
+
+Identifying and localizing objects within an environment is crucial for robot interaction. Isaac ROS provides packages for accelerating object detection.
+
+-   **`isaac_ros_detectnet`**: Utilizes NVIDIA's DetectNetV2 model for high-performance 2D object detection.
+-   **`isaac_ros_unet`**: Provides segmentation capabilities using U-Net models.
+
+### Stereo Depth
+
+Estimating depth from stereo camera pairs is fundamental for 3D perception.
+
+-   **`isaac_ros_stereo_image_proc`**: Hardware-accelerated stereo image processing to generate disparity and depth maps.
+
+## Integrating Isaac ROS with Jetson
+
+Isaac ROS packages are primarily designed for deployment on NVIDIA Jetson devices, which are powerful embedded platforms for AI at the edge.
+
+### Workflow
+
+1.  **Develop in Simulation**: Create and test your algorithms in Isaac Sim.
+2.  **Train Models**: Use synthetic data from Isaac Sim and real-world data to train perception models.
+3.  **Deploy to Jetson**: Transfer your ROS 2 nodes, including Isaac ROS components, to a Jetson device.
+4.  **Real-world Testing**: Test and refine your robot's perception capabilities in a physical environment.
+
+## Example: Running Visual SLAM
+
+To run VSLAM, you typically need:
+-   A camera publishing image data (e.g., from a RealSense camera).
+-   The `isaac_ros_visual_slam` node subscribing to the camera topics.
+-   A map visualization tool (e.g., RViz2) to see the generated map.
+
+**(Further details and launch file example for VSLAM would go here.)**

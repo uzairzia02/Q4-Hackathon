@@ -1,0 +1,133 @@
+---
+sidebar_position: 2
+---
+
+# Chapter 6: Sensor Simulation in Gazebo
+
+Accurate sensor simulation is crucial for developing and testing robot control algorithms, especially in the context of Physical AI where robots interact with and perceive their environment. Gazebo provides a rich set of tools for simulating various types of sensors, allowing us to test our algorithms before deploying them on expensive or fragile hardware.
+
+## Types of Sensors
+
+Gazebo supports a wide range of virtual sensors that mimic their real-world counterparts. Common examples relevant to humanoid robotics include:
+
+-   **Cameras**: Provide RGB (color) images. Useful for object detection, recognition, and visual servoing.
+-   **Depth Cameras**: Provide depth information along with RGB data (e.g., Intel RealSense, Kinect). Essential for 3D reconstruction, obstacle avoidance, and manipulation.
+-   **LiDAR (Light Detection and Ranging)**: Provides 2D or 3D point cloud data, useful for mapping, localization, and navigation.
+-   **IMU (Inertial Measurement Unit)**: Provides linear acceleration and angular velocity, critical for robot pose estimation and balance control.
+-   **Contact Sensors**: Detect physical contact with objects, often used for grippers or safety.
+-   **Force/Torque Sensors**: Measure forces and torques applied at specific points (e.g., robot joints, end-effectors).
+
+## Simulating Sensors in Gazebo
+
+Sensors are typically defined within the SDF description of a robot model or directly within a Gazebo world file. Each sensor has various parameters that can be configured, such as:
+
+-   **`type`**: The type of sensor (e.g., `camera`, `depth`, `gpu_lidar`, `imu`).
+-   **`always_on`**: Whether the sensor is always active.
+-   **`update_rate`**: How often the sensor publishes data.
+-   **`visualize`**: Whether to display the sensor's output in the Gazebo client.
+-   **`topic`**: The ROS 2 topic name where sensor data will be published.
+
+### Camera Sensor Example
+
+A camera sensor can be configured to produce realistic images, including noise and distortion.
+
+```xml
+<sensor name="camera_sensor" type="camera">
+  <always_on>1</always_on>
+  <update_rate>30.0</update_rate>
+  <camera>
+    <horizontal_fov>1.047</horizontal_fov>
+    <image>
+      <width>640</width>
+      <height>480</height>
+      <format>R8G8B8</format>
+    </image>
+    <clip>
+      <near>0.1</near>
+      <far>100</far>
+    </clip>
+    <noise>
+      <type>gaussian</type>
+      <mean>0.0</mean>
+      <stddev>0.007</stddev>
+    </noise>
+  </camera>
+  <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+    <ros>
+      <namespace>/camera</namespace>
+      <argument>--ros-args -r __ns:=/my_robot/camera</argument>
+    </ros>
+    <camera_name>my_camera</camera_name>
+    <frame_name>camera_link</frame_name>
+  </plugin>
+</sensor>
+```
+
+### Depth Camera Sensor Example (mimicking Intel RealSense)
+
+Depth cameras combine an RGB camera with an infrared projector and sensor to produce depth maps.
+
+```xml
+<sensor name="depth_camera" type="depth_camera">
+  <always_on>1</always_on>
+  <update_rate>20.0</update_rate>
+  <camera>
+    <!-- RGB Camera parameters -->
+  </camera>
+  <depth_camera>
+    <!-- Depth-specific parameters -->
+    <range>
+      <min>0.1</min>
+      <max>10</max>
+    </range>
+  </depth_camera>
+  <plugin name="depth_camera_controller" filename="libgazebo_ros_depth_camera.so">
+    <ros>
+      <namespace>/depth_camera</namespace>
+    </ros>
+    <camera_name>depth_camera</camera_name>
+    <frame_name>depth_camera_link</frame_name>
+  </plugin>
+</sensor>
+```
+
+### LiDAR Sensor Example
+
+LiDAR sensors emit laser pulses and measure the time it takes for them to return, creating a point cloud.
+
+```xml
+<sensor name="laser_sensor" type="gpu_lidar">
+  <pose>0 0 0 0 0 0</pose>
+  <visualize>true</visualize>
+  <always_on>1</always_on>
+  <update_rate>10</update_rate>
+  <lidar>
+    <scan>
+      <horizontal>
+        <samples>640</samples>
+        <resolution>1</resolution>
+        <min_angle>-2.2</min_angle>
+        <max_angle>2.2</max_angle>
+      </horizontal>
+      <vertical>
+        <samples>1</samples>
+        <resolution>1</resolution>
+        <min_angle>0</min_angle>
+        <max_angle>0</max_angle>
+      </vertical>
+    </scan>
+    <range>
+      <min>0.1</min>
+      <max>10</max>
+      <resolution>0.01</resolution>
+    </range>
+  </lidar>
+  <plugin name="laser_controller" filename="libgazebo_ros_laser.so">
+    <ros>
+      <namespace>/laser</namespace>
+    </ros>
+    <topic_name>scan</topic_name>
+    <frame_name>laser_frame</frame_name>
+  </plugin>
+</sensor>
+```

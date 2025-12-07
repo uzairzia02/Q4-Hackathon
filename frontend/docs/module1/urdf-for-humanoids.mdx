@@ -1,0 +1,100 @@
+---
+sidebar_position: 4
+---
+
+# Chapter 4: URDF for Humanoid Robots
+
+The Unified Robot Description Format (URDF) is an XML format for describing all elements of a robot. In ROS 2, URDF is used to model the kinematic and dynamic properties of a robot, its visual appearance, and collision properties. For humanoid robots, a detailed and accurate URDF is crucial for simulation, motion planning, and control.
+
+## What is URDF?
+
+URDF models a robot as a set of rigid bodies (links) connected by joints.
+
+-   **Links**: Represent the physical segments of the robot (e.g., torso, upper arm, forearm, hand). Each link has an inertial properties (mass, inertia matrix), visual properties (geometry, color, texture), and collision properties.
+-   **Joints**: Represent the connections between links and define their relative motion (e.g., revolute, prismatic, fixed). Each joint has a type, origin (position and orientation), axis, and limits (upper, lower, velocity, effort).
+
+## Key Elements of a Humanoid URDF
+
+For humanoid robots, URDF files can become quite complex due to the large number of links and joints.
+
+### `robot` Element
+
+The root element of every URDF file. It must have a `name` attribute.
+
+```xml
+<robot name="my_humanoid">
+  <!-- Links and Joints go here -->
+</robot>
+```
+
+### `link` Element
+
+Each `link` element describes a rigid body.
+
+-   **`inertial`**: Defines the mass, center of mass, and inertia matrix. Essential for physics simulation.
+-   **`visual`**: Describes the appearance of the link, including its geometry (box, cylinder, sphere, mesh) and material (color, texture).
+-   **`collision`**: Defines the collision geometry of the link. This can be simpler than the visual geometry for performance.
+
+**Example Link**
+
+```xml
+<link name="torso">
+  <inertial>
+    <origin xyz="0 0 0.2" rpy="0 0 0"/>
+    <mass value="10"/>
+    <inertia ixx="0.5" ixy="0" ixz="0" iyy="0.5" iyz="0" izz="0.5"/>
+  </inertial>
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.2 0.4 0.6"/>
+    </geometry>
+    <material name="blue">
+      <color rgba="0 0 0.8 1"/>
+    </material>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.2 0.4 0.6"/>
+    </geometry>
+  </collision>
+</link>
+```
+
+### `joint` Element
+
+Each `joint` element describes a connection between two links.
+
+-   **`parent`**: Specifies the name of the parent link.
+-   **`child`**: Specifies the name of the child link.
+-   **`type`**: Defines the type of joint (e.g., `revolute`, `continuous`, `prismatic`, `fixed`, `floating`, `planar`).
+    -   **`revolute`**: A single degree of freedom rotational joint with limits.
+    -   **`continuous`**: A single degree of freedom rotational joint without limits.
+    -   **`prismatic`**: A single degree of freedom translational joint with limits.
+    -   **`fixed`**: A joint that rigidly connects two links (no degrees of freedom).
+-   **`origin`**: Position and orientation of the joint relative to the parent link.
+-   **`axis`**: Specifies the axis of rotation or translation.
+-   **`limit`**: Defines the physical limits of the joint (lower, upper, velocity, effort).
+
+**Example Joint**
+
+```xml
+<joint name="torso_to_head_joint" type="revolute">
+  <parent link="torso"/>
+  <child link="head"/>
+  <origin xyz="0 0 0.3" rpy="0 0 0"/>
+  <axis xyz="0 0 1"/>
+  <limit lower="-1.57" upper="1.57" effort="10" velocity="1"/>
+</joint>
+```
+
+## Xacro: An Extension to URDF
+
+Writing complex URDFs can be repetitive. Xacro (XML Macros) is an XML macro language that allows for more concise and readable robot descriptions by enabling macros, properties, and mathematical expressions.
+
+**(Further details and examples on Xacro would go here.)**
+
+## Visualizing URDFs
+
+URDF files can be visualized in tools like RViz2 (ROS 2 Visualization) or Gazebo. This helps in verifying the robot's kinematic structure and visual appearance.

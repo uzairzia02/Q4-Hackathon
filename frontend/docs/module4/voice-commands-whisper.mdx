@@ -1,0 +1,111 @@
+---
+sidebar_position: 1
+---
+
+# Chapter 10: Voice Commands with OpenAI Whisper
+
+Integrating natural language understanding into robotics is a crucial step towards creating truly autonomous and human-friendly systems. OpenAI Whisper is a powerful general-purpose speech-to-text model that can accurately transcribe human speech into text, forming the crucial first link in a Vision-Language-Action (VLA) pipeline for voice-controlled robots.
+
+## What is OpenAI Whisper?
+
+Whisper is an open-source neural network that was trained on a large dataset of diverse audio and text. It can:
+-   **Transcribe audio** in multiple languages.
+-   **Translate audio** from those languages into English.
+-   **Identify the language** being spoken.
+
+For robotics, its primary application is to convert spoken commands into text that an AI planner (like an LLM) can then process.
+
+## Whisper in the VLA Pipeline
+
+The VLA pipeline aims to translate natural language instructions into a sequence of robot actions. Whisper plays the "Voice" part of this:
+
+`Voice (Speech) -> Whisper -> Language (Text) -> LLM Planner -> Action (Robot Commands)`
+
+## Integrating Whisper with Robotics
+
+### Audio Input
+
+For a robot to understand voice commands, it needs a microphone to capture audio. On physical robots, this is typically a USB microphone array (e.g., ReSpeaker) connected to the robot's computing unit (like an NVIDIA Jetson). In simulation, you might simulate audio input or feed pre-recorded audio files.
+
+### Using the Whisper API
+
+OpenAI provides an API for Whisper, making it easy to integrate into Python applications.
+
+**Example: Transcribing Audio (Python)**
+
+```python
+import openai
+import os
+
+# Set your OpenAI API key
+# openai.api_key = os.getenv("OPENAI_API_KEY")
+
+def transcribe_audio(audio_file_path):
+    with open(audio_file_path, "rb") as audio_file:
+        transcript = openai.audio.transcriptions.create(
+            model="whisper-1",
+            file=audio_file
+        )
+    return transcript.text
+
+# Example usage (assuming you have an audio file named "command.mp3")
+# audio_command = "command.mp3"
+# transcribed_text = transcribe_audio(audio_command)
+# print(f"Transcribed: {transcribed_text}")
+```
+
+### ROS 2 Node for Whisper
+
+To integrate Whisper into a ROS 2 system, you would typically create a ROS 2 node that:
+1.  Subscribes to an audio topic (e.g., from an audio driver).
+2.  Processes the audio (e.g., buffers, samples).
+3.  Calls the Whisper API (or local Whisper model) for transcription.
+4.  Publishes the transcribed text to a new ROS 2 topic.
+
+**Example ROS 2 Node Structure (Python)**
+
+```python
+import rclpy
+from rclpy.node import Node
+from audio_common_msgs.msg import AudioData # Assuming this message type exists or is custom
+from std_msgs.msg import String
+# import openai # For API calls
+
+class WhisperNode(Node):
+    def __init__(self):
+        super().__init__('whisper_node')
+        self.get_logger().info('Whisper Node Started.')
+
+        self.audio_subscription = self.create_subscription(
+            AudioData,
+            '/audio/data',
+            self.audio_callback,
+            10
+        )
+        self.text_publisher = self.create_publisher(String, '/robot/voice_command', 10)
+
+        self.audio_buffer = [] # Buffer for incoming audio data
+
+    def audio_callback(self, msg: AudioData):
+        # Buffer audio data or process in real-time
+        self.audio_buffer.extend(msg.data)
+        
+        # Example: if buffer reaches certain size or silence detected, transcribe
+        if len(self.audio_buffer) > 16000 * 3: # Roughly 3 seconds of 16kHz mono audio
+            # Convert buffer to format Whisper expects (e.g., WAV)
+            # Call Whisper API
+            transcribed_text = "simulated command" # Placeholder
+            self.get_logger().info(f"Transcribed: {transcribed_text}")
+            self.text_publisher.publish(String(data=transcribed_text))
+            self.audio_buffer = [] # Clear buffer
+            
+def main(args=None):
+    rclpy.init(args=args)
+    whisper_node = WhisperNode()
+    rclpy.spin(whisper_node)
+    whisper_node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```

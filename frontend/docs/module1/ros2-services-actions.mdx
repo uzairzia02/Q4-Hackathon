@@ -1,0 +1,144 @@
+---
+sidebar_position: 3
+---
+
+# Chapter 3: ROS 2 Services & Actions
+
+In addition to topics, ROS 2 provides other communication paradigms to handle different types of interactions between nodes. Services are used for synchronous request/response patterns, while Actions are designed for long-running tasks with periodic feedback.
+
+## ROS 2 Services
+
+Services allow a node (the client) to send a request to another node (the server) and wait for a response. This is useful for operations that need to complete before the client can proceed, such as querying a robot's state or triggering a specific, short-duration behavior.
+
+### Defining Service Interfaces
+
+Service interfaces are defined in `.srv` files. These files specify the structure of the request and response messages.
+
+**Example: `AddTwoInts.srv`**
+
+```
+int64 a
+int64 b
+---
+int64 sum
+```
+
+The `---` separates the request fields from the response fields.
+
+### Implementing a Service Server
+
+A service server node implements the logic to handle incoming requests and send back a response.
+
+**Python Example (`add_two_ints_server.py`)**
+
+```python
+import rclpy
+from rclpy.node import Node
+from example_interfaces.srv import AddTwoInts
+
+class AddTwoIntsService(Node):
+
+    def __init__(self):
+        super().__init__('add_two_ints_server')
+        self.srv = self.create_service(AddTwoInts, 'add_two_ints', self.add_two_ints_callback)
+        self.get_logger().info('Service server started.')
+
+    def add_two_ints_callback(self, request, response):
+        response.sum = request.a + request.b
+        self.get_logger().info(f'Incoming request: a={request.a}, b={request.b}. Sending response: {response.sum}')
+        return response
+
+def main(args=None):
+    rclpy.init(args=args)
+    add_two_ints_service = AddTwoIntsService()
+    rclpy.spin(add_two_ints_service)
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+### Implementing a Service Client
+
+A service client node sends a request to a service server and processes the response.
+
+**Python Example (`add_two_ints_client.py`)**
+
+```python
+import rclpy
+from rclpy.node import Node
+from example_interfaces.srv import AddTwoInts
+import sys
+
+class AddTwoIntsClient(Node):
+
+    def __init__(self):
+        super().__init__('add_two_ints_client')
+        self.client = self.create_client(AddTwoInts, 'add_two_ints')
+        while not self.client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service not available, waiting again...')
+        self.req = AddTwoInts.Request()
+
+    def send_request(self, a, b):
+        self.req.a = a
+        self.req.b = b
+        self.future = self.client.call_async(self.req)
+
+def main(args=None):
+    rclpy.init(args=args)
+    if len(sys.argv) != 3:
+        AddTwoIntsClient.get_logger().info('Usage: add_two_ints_client <arg1> <arg2>')
+        return
+    
+    add_two_ints_client = AddTwoIntsClient()
+    add_two_ints_client.send_request(int(sys.argv[1]), int(sys.argv[2]))
+
+    while rclpy.ok():
+        rclpy.spin_once(add_two_ints_client)
+        if add_two_ints_client.future.done():
+            try:
+                response = add_two_ints_client.future.result()
+            except Exception as e:
+                add_two_ints_client.get_logger().error(f'Service call failed: {e}')
+            else:
+                add_two_ints_client.get_logger().info(f'Result of add_two_ints: {response.sum}')
+            break
+    
+    add_two_ints_client.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## ROS 2 Actions
+
+Actions are a higher-level communication type built on top of topics and services. They are designed for longer-running tasks (e.g., navigating to a goal, picking up an object) that might be preempted and require periodic feedback about their progress.
+
+### Defining Action Interfaces
+
+Action interfaces are defined in `.action` files. They specify a goal, a result, and feedback structure.
+
+**Example: `Fibonacci.action`**
+
+```
+int32 order
+---
+int32[] sequence
+---
+int32[] partial_sequence
+```
+
+The first `---` separates the goal from the result, and the second `---` separates the result from the feedback.
+
+### Implementing an Action Server
+
+An action server node processes action goals from clients, provides feedback, and sends a final result.
+
+**(Further details and Python example for Action Server would go here.)**
+
+### Implementing an Action Client
+
+An action client node sends an action goal to a server, receives feedback, and processes the final result.
+
+**(Further details and Python example for Action Client would go here.)**

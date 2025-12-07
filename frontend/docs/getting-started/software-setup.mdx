@@ -1,0 +1,55 @@
+---
+sidebar_position: 2
+---
+
+# Software Setup Guide
+
+This guide will walk you through setting up the necessary software for the course.
+
+## 1. Operating System
+
+You must have **Ubuntu 22.04 LTS** installed. Native or dual-boot is required. a VM is not recommended due to GPU passthrough complexities.
+
+## 2. Core Robotics Software
+
+### ROS 2 Humble
+
+Follow the official ROS 2 documentation to install ROS 2 Humble Hawksbill:
+[https://docs.ros.org/en/humble/Installation.html](https://docs.ros.org/en/humble/Installation.html)
+
+### Gazebo
+
+Install Gazebo Fortress, which is the version recommended for ROS 2 Humble:
+```bash
+sudo apt-get install ignition-fortress
+```
+
+## 3. NVIDIA Isaac Platform
+
+### Isaac Sim
+
+1.  Install NVIDIA Omniverse Launcher.
+2.  From the launcher, install Isaac Sim. Refer to the official documentation for detailed steps and troubleshooting.
+
+### Isaac ROS
+
+Isaac ROS packages are GPU-accelerated and optimized for the Jetson platform. We will install these in a later module.
+
+## 4. Development Tools
+
+### Python
+
+Ensure you have Python 3.10+ installed. We recommend using a virtual environment:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### Docusaurus (Frontend)
+
+The course website is built with Docusaurus. To run it locally:
+```bash
+cd frontend
+npm install
+npm start
+```

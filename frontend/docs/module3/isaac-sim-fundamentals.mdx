@@ -1,0 +1,97 @@
+---
+sidebar_position: 1
+---
+
+# Chapter 7: NVIDIA Isaac Sim Fundamentals
+
+NVIDIA Isaac Sim is a powerful, photorealistic, and physics-accurate virtual environment for developing, testing, and training AI-based robots. Built on NVIDIA Omniverse™, Isaac Sim provides a scalable platform for simulating a wide range of robots and environments.
+
+## What is NVIDIA Isaac Sim?
+
+Isaac Sim is more than just a simulator; it's a robotics simulation toolkit. It leverages the NVIDIA Omniverse platform to deliver:
+-   **Photorealistic Rendering**: Create visually stunning and realistic environments using real-time ray tracing.
+-   **Accurate Physics**: Simulate rigid body dynamics, soft bodies, and fluids with high fidelity.
+-   **Synthetic Data Generation**: Generate large-scale, annotated datasets for training perception models.
+-   **Sim-to-Real**: Seamlessly transfer trained models from simulation to real-world robots.
+
+## Key Features
+
+### Omniverse Platform
+
+Isaac Sim is built on NVIDIA Omniverse, a platform for 3D simulation and collaboration. This provides:
+-   **Universal Scene Description (USD)**: A common framework for describing, composing, and collaborating on 3D scenes.
+-   **RTX Technology**: Real-time ray tracing and AI-accelerated graphics.
+-   **Connectors**: Integrate with other 3D applications and tools.
+
+### Synthetic Data Generation (SDG)
+
+SDG is a critical feature of Isaac Sim. It allows you to generate large, diverse, and perfectly labeled datasets for training AI models. This is particularly useful for tasks like:
+-   **Object Detection**: Bounding boxes, semantic segmentation.
+-   **Pose Estimation**: 3D keypoints, object orientation.
+-   **Domain Randomization**: Varying lighting, textures, and object placements to create robust models.
+
+### ROS/ROS 2 Integration
+
+Isaac Sim provides seamless integration with ROS and ROS 2. This allows you to:
+-   **Control simulated robots** with your existing ROS 2 nodes.
+-   **Publish sensor data** from simulated sensors to ROS 2 topics.
+-   **Subscribe to ROS 2 topics** to actuate robot joints.
+
+### Python Scripting
+
+Isaac Sim provides a powerful Python scripting interface. This allows you to:
+-   **Programmatically control** the simulation environment.
+-   **Automate** data generation and training workflows.
+-   **Create custom extensions** and tools.
+
+## Getting Started with Isaac Sim
+
+### Installation
+
+Isaac Sim is installed through the NVIDIA Omniverse Launcher. You'll need an NVIDIA RTX-capable GPU and the appropriate drivers.
+
+### Creating a Simple Scene
+
+A simple scene in Isaac Sim can be created using the Python scripting interface.
+
+**Example: Spawning a Cube**
+
+```python
+from omni.isaac.kit import SimulationApp
+
+# Configuration for the simulation
+config = {
+    "width": 1280,
+    "height": 720,
+    "headless": False,
+}
+
+# Create a simulation app
+simulation_app = SimulationApp(config)
+
+from omni.isaac.core import World
+from omni.isaac.core.objects import cuboid
+
+# Create a world
+world = World()
+
+# Add a cube to the world
+world.scene.add(
+    cuboid.VisualCuboid(
+        prim_path="/World/random_cube",
+        position=(0, 0, 1.0),
+        scale=(0.5, 0.5, 0.5),
+        color=(1.0, 0, 0),
+    )
+)
+
+# Reset the world to ensure the cube is loaded
+world.reset()
+
+# Run the simulation
+while simulation_app.is_running():
+    world.step(render=True)
+
+# Cleanup
+simulation_app.close()
+```
