@@ -18,7 +18,11 @@ const config: Config = {
   url: 'https://uzairzia02.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/Q4-Hackathon/',
+  baseUrl: '/',
+
+  customFields: {
+    backendUrl: process.env.BACKEND_URL || 'http://localhost:8000',
+  },
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
