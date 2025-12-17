@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import clsx from 'clsx';
 import styles from './styles.module.css';
 
 const Chatbot = () => {
@@ -92,9 +93,10 @@ const Chatbot = () => {
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`${styles.message} ${
-                  msg.isBot ? styles.botMessage : styles.userMessage
-                }`}
+                className={clsx(styles.message, {
+                  [styles.botMessage]: msg.isBot,
+                  [styles.userMessage]: !msg.isBot,
+                })}
               >
                 {msg.text}
               </div>
