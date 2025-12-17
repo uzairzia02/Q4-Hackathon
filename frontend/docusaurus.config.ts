@@ -21,7 +21,8 @@ const config: Config = {
   baseUrl: '/',
 
   customFields: {
-    backendUrl: process.env.BACKEND_URL || 'http://localhost:8000',
+    backendUrl: process.env.BACKEND_URL || 'http://localhost:8000/chat',
+    apiKey: 'your_secret_api_key',
   },
 
   // GitHub pages deployment config.
