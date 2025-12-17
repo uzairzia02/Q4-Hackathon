@@ -43,7 +43,7 @@ const Chatbot = () => {
     setInput('');
 
     try {
-      const response = await fetch(backendUrl, {
+      const response = await fetch(`${backendUrl}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -21,7 +21,7 @@ const config: Config = {
   baseUrl: '/',
 
   customFields: {
-    backendUrl: process.env.BACKEND_URL || 'http://localhost:8000/chat',
+    backendUrl: process.env.BACKEND_URL || 'http://localhost:8000',
     apiKey: 'your_secret_api_key',
   },
 
