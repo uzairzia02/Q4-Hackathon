@@ -1,0 +1,44 @@
+openapi: 3.0.0
+info:
+  title: Integrated RAG Chatbot API
+  version: 1.0.0
+  description: API for the Integrated RAG Chatbot.
+paths:
+  /chat:
+    post:
+      summary: Get a response from the chatbot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: The user's question.
+                selected_text:
+                  type: string
+                  description: Optional selected text from the book for contextual queries.
+      responses:
+        '200':
+          description: A successful response from the chatbot.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  answer:
+                    type: string
+                    description: The chatbot's answer.
+                  sources:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        url:
+                          type: string
+                        text:
+                          type: string
+        '500':
+          description: Internal server error.
