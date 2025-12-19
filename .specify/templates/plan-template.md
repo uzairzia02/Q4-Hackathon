@@ -31,13 +31,7 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- [ ] **I. The Physical-Digital Bridge:** Does the plan account for both simulation and real-world deployment?
-- [ ] **II. Progressive and Layered Learning:** Is the feature broken down into manageable, progressive steps?
-- [ ] **III. Interactive & Intelligent Learning Experience:** Does the plan consider how this feature will integrate with the interactive learning tools?
-- [ ] **IV. Personalization & Accessibility:** Does the plan address personalization and accessibility requirements?
-- [ ] **V. Grounded in Practicality:** Are hardware and real-world constraints considered?
-- [ ] **VI. Success is Measured by Embodied AI Mastery:** Does the plan align with the ultimate success criteria of the book?
-- [ ] **VII. Technology Platform:** Is the plan compatible with the Docusaurus ecosystem?
+[Gates determined based on constitution file]
 
 ## Project Structure
 

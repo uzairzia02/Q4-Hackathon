@@ -7,6 +7,7 @@ const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const { siteConfig } = useDocusaurusContext();
+  console.log('DEBUG: siteConfig.customFields:', siteConfig.customFields);
   const { backendUrl, apiKey } = siteConfig.customFields;
   const messagesEndRef = useRef(null);
 
@@ -37,12 +38,23 @@ const Chatbot = () => {
   const handleSend = async () => {
     if (input.trim() === '') return;
 
+    // Check if API key is available
+    if (!apiKey) {
+      const newMessages = [...messages, { text: input, isBot: false }];
+      setMessages([
+        ...newMessages,
+        { text: "Error: API key is not configured. Please check your settings.", isBot: true }
+      ]);
+      setInput('');
+      return;
+    }
+
     const newMessages = [...messages, { text: input, isBot: false }];
     setMessages(newMessages);
     setInput('');
 
     try {
-      const response = await fetch(backendUrl, {
+      const response = await fetch(`${backendUrl}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,6 +62,7 @@ const Chatbot = () => {
         },
         body: JSON.stringify({
           query: input,
+          selected_text: null,  // Explicitly send null for optional field
           user_id: 'docusaurus-user',
         }),
       });
@@ -59,14 +72,14 @@ const Chatbot = () => {
       }
 
       const data = await response.json();
-      const botMessage = data.response;
+      const botMessage = data.answer || data.response || "Sorry, I didn't receive a proper response from the server.";
 
       setMessages([...newMessages, { text: botMessage, isBot: true }]);
     } catch (error) {
       console.error("Failed to fetch from chatbot API:", error);
       setMessages([
         ...newMessages,
-        { text: "Sorry, I'm having trouble connecting to the server.", isBot: true },
+        { text: "Sorry, I'm having trouble connecting to the server. Please try again later.", isBot: true },
       ]);
     }
   };
