@@ -4,6 +4,7 @@ from fastapi.security import APIKeyHeader
 from fastapi.middleware.cors import CORSMiddleware
 from src.api import chat
 from src.core.logging import get_logger
+from src.core.config import settings
 import time
 
 app = FastAPI()
@@ -11,7 +12,7 @@ app = FastAPI()
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000/"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -23,10 +24,8 @@ API_KEY_NAME = "X-API-KEY"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 async def get_api_key(api_key: str = Depends(api_key_header)):
-    if not api_key:
+    if not api_key or api_key != settings.COHERE_API_KEY:
         raise HTTPException(status_code=403, detail="Could not validate credentials")
-    # In a real application, you would validate the API key against a database
-    # For this example, we'll just check if it's not empty
     return api_key
 
 @app.middleware("http")
@@ -45,4 +44,10 @@ async def generic_exception_handler(request: Request, exc: Exception):
         content={"message": "An internal server error occurred."},
     )
 
+# Test endpoint to verify basic functionality
+@app.get("/test")
+def test_endpoint():
+    return {"message": "Server is working!"}
+
+# Re-adding API key protection to the chat router
 app.include_router(chat.router, dependencies=[Depends(get_api_key)])
