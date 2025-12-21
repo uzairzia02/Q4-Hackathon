@@ -12,6 +12,31 @@ def extract_content_from_url(url: str) -> str:
     downloaded = trafilatura.fetch_url(url)
     return trafilatura.extract(downloaded)
 
+def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 100) -> list[str]:
+    """
+    Split text into overlapping chunks of specified size.
+    """
+    if len(text) <= chunk_size:
+        return [text]
+
+    chunks = []
+    start = 0
+    while start < len(text):
+        end = start + chunk_size
+        chunk = text[start:end]
+        chunks.append(chunk)
+
+        # Move start forward by chunk_size - overlap to create overlap
+        start = end - overlap
+
+        # Handle the case where the remaining text is shorter than chunk_size
+        if len(text) - start < chunk_size:
+            if len(text) - start > 0:
+                chunks.append(text[start:])
+            break
+
+    return chunks
+
 import argparse
 from src.services.cohere_service import CohereService
 from src.services.qdrant_service import QdrantService
@@ -30,7 +55,7 @@ def ingest(sitemap_url: str, collection_name: str):
         if content:
             chunks = chunk_text(content)
             print(f"  Split into {len(chunks)} chunks.")
-            
+
             embeddings = cohere_service.client.embed(
                 texts=chunks,
                 model="embed-english-v3.0",

@@ -36,19 +36,58 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
         sources = []
         try:
             qdrant_service = QdrantService()
-            search_results = qdrant_service.search("physical_ai_book", query_embedding, limit=5)
-            sources = [{"url": result.payload["url"], "text": result.payload["text"]} for result in search_results]
+            search_response = qdrant_service.search("physical_ai_book1", query_embedding, limit=5)
+
+            # Check if the response is a QueryResponse object (newer versions) or a list
+            if hasattr(search_response, 'points'):  # QueryResponse object
+                search_results = search_response.points
+            elif isinstance(search_response, (list, tuple)):  # List of results
+                search_results = search_response
+            else:
+                search_results = []
+
+            print(f"Qdrant search successful, found {len(search_results) if search_results else 0} results")
+
+            # Process the search results
+            if search_results:
+                # Each result should have a payload attribute
+                sources = []
+                context_parts = []
+                for result in search_results:
+                    # Extract payload - may be in different formats depending on version
+                    if hasattr(result, 'payload'):
+                        payload = result.payload
+                    elif hasattr(result, '__getitem__') and len(result) > 1:
+                        # Tuple format (id, payload, vector, ...)
+                        payload = result[1] if isinstance(result[1], dict) else {}
+                    else:
+                        payload = {}
+
+                    text = payload.get("text", "")
+                    url = payload.get("url", "")
+
+                    sources.append({"url": url, "text": text})
+                    if text:
+                        context_parts.append(text)
+
+                context = "\n".join(context_parts)
+            else:
+                sources = [{"url": "no-results", "text": "No relevant content found in the book"}]
+                context = "No specific context available from the book."
+
         except Exception as qdrant_error:
-            print(f"Qdrant error (this is OK for testing): {str(qdrant_error)}")
+            print(f"Qdrant error: {str(qdrant_error)}")
             # Create a mock response for testing purposes
             sources = [{"url": "mock-url", "text": "This is a mock response for testing."}]
+            context = "No specific context available from the book."
 
         # Build the prompt
-        context = "\n".join([result.payload["text"] for result in search_results]) if search_results else "No specific context available."
-        prompt = f"Based on the following context, answer the user's question.\n\nContext:\n{context}\n\nQuestion: {request.query}"
+        prompt = f"Based on the following context from the Physical AI and Humanoid Robotics book, answer the user's question.\n\nContext:\n{context}\n\nQuestion: {request.query}"
+        print(f"Generated prompt: {prompt[:100]}...")  # Log first 100 chars of prompt
 
         # Generate the response
         answer = cohere_service.generate_response(prompt)
+        print(f"Cohere response received: {answer[:50]}...")  # Log first 50 chars of response
 
         # Save the conversation (with error handling for missing table)
         try:
