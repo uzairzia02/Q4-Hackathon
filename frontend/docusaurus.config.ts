@@ -21,7 +21,10 @@ const config: Config = {
   baseUrl: '/',
 
   customFields: {
-    backendUrl: process.env.BACKEND_URL || 'http://localhost:8000',
+    backendUrl: process.env.BACKEND_URL ||
+                (process.env.NODE_ENV === 'production'
+                 ? 'https://q4-hackathon-ayio.vercel.app'
+                 : 'http://localhost:8000'),
     apiKey: 'OwR0MgBu6o47fBUXA1PX379Up0iONX2004n5EMzo',
   },
 
